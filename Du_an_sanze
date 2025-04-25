@@ -1,0 +1,3 @@
+Chuyển db để chỉnh sửa 
+[6] pry(main)> Apartment::Tenant.switch!('caetech')  # 'caetech' là tên tenant (thường là subdomain)
+

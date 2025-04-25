@@ -1,0 +1,73 @@
+1️⃣ Hiểu sâu hơn về Performance & Caching
+🔹 Chỉ số hiệu năng quan trọng:
+
+Tìm hiểu Slow Query (dùng EXPLAIN ANALYZE trong PostgreSQL).
+
+Giám sát hiệu năng với New Relic, Scout APM.
+
+🔹 Tối ưu performance:
+
+Caching với Rails Cache Store (MemoryStore, Redis, Memcached).
+
+Query batching: find_each, pluck, select, pagination với kaminari hoặc pagy.
+
+Preloading data: includes, eager_load, joins.
+
+Sidekiq optimization: Dùng batch jobs, throttling, retry policy.
+
+🔹 Học thêm CDN:
+
+Dùng Cloudflare, AWS CloudFront, Fastly để cache asset, tối ưu tải trang.
+
+2️⃣ High Availability & Scaling
+🔹 Database Scaling:
+
+Read replica (Dùng PostgreSQL replication).
+
+Partitioning, sharding dữ liệu.
+
+🔹 Queue Scaling:
+
+Background job scaling với Sidekiq + Redis Cluster.
+
+Rate limiting để tránh server quá tải (dùng Rack::Attack, Redis).
+
+🔹 WebSocket Scaling:
+
+Redis Pub/Sub để scale WebSocket ngang hàng.
+
+Dùng AnyCable để thay thế ActionCable nếu cần hiệu năng cao.
+
+3️⃣ Bảo mật (Security & Authentication)
+🔹 Bảo mật API & Web:
+
+CSRF, XSS, SQL Injection.
+
+Secure Headers (dùng secure_headers).
+
+Brute-force protection với Rack::Attack.
+
+Thêm JWT với refresh token thay vì session-based auth.
+
+🔹 Học thêm OAuth & SSO:
+
+Xác thực với OAuth2 (Google, Facebook, Github).
+
+Implement SSO với Devise + OmniAuth.
+
+Học SAML, OpenID Connect nếu làm enterprise.
+
+4️⃣ DevOps & Deployment
+🔹 Docker + Kubernetes:
+
+Học cách đóng gói Rails app với Docker.
+
+Dùng Kubernetes để auto-scale Rails app.
+
+Load balancing với Nginx + Puma.
+
+🔹 CI/CD:
+
+Học cách deploy Rails với Capistrano, GitHub Actions, CircleCI.
+
+Học Terraform, Ansible để tự động hóa hạ tầng.

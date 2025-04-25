@@ -1,0 +1,426 @@
+Có thể có attribute tạm thời (attr_accessor) không lưu vào database.
+Có khả năng ánh xạ tên dựa theo quy tắc đặt tên trong model để ánh xạ tới table 
+Có thể đặt tên cho các bảng để có tiền tố hậu tố mặc định ví dụ ralis g creat book::order (tiền tố là book)
+sử dụng migratation để tạo bảng thì trường id sẽ được tạo tự động và trường id thường là trường để làm khóa chính 
+dùng self để ghi đè những name mặc định trong model 
+Callbacks giúp thực hiện hành động trước hoặc sau khi thao tác trên bản ghi. 
+------------------------------------------------------------------------------------
+Migrate 
+rails db:migrate:status Kiểm tra danh sách migration đã chạy:
+rails db:rollback STEP=1  # Quay về 1 bước trước đó
+rails db:migrate          # Chạy lại migration
+------------------------------------------------------------------------------------
+Schema là bản ghi chép về cấu trúc database, giúp Rails hiểu trạng thái hiện tại của database.
+
+Xóa database rails db:drop
+Lệnh này sẽ xóa hoàn toàn database, bao gồm tất cả bảng, dữ liệu, và trạng thái migration (schema_migrations).
+------------------------------------------------------------------------------------
+Model 
+bin/rails generate model Product name:string price:decimal
+Lệnh này sẽ:
+Tạo file model:
+📄 app/models/product.rb
+Tạo file migration:
+📄 db/migrate/20250303120000_create_products.rb
+------------------------------------------------------------------------------------
+schema
+Schema là bản ghi chép về cấu trúc database, giúp Rails hiểu trạng thái hiện tại của database.
+Xóa database rails db:drop
+Lệnh này sẽ xóa hoàn toàn database, bao gồm tất cả bảng, dữ liệu, và trạng thái migration (schema_migrations).
+bin/rails db:schema:load
+✅ Lệnh này sẽ bỏ qua migration và tạo database từ schema.rb.
+⚠️ Lưu ý: Nó sẽ xóa toàn bộ dữ liệu trong database trước khi tạo lại!
+bin/rails db:migrate
+✅ Lệnh này sẽ chạy tất cả migration và tự động cập nhật schema.rb.
+bin/rails db:schema:dump
+✅ Lệnh này chỉ ghi lại cấu trúc database vào schema.rb mà không chạy migration.
+schema.rb không lưu lại lịch sử thay đổi của database. Nó chỉ chứa trạng thái cuối cùng của database sau khi chạy migration gần nhất.
+Đổi loại schema dump mặc định trong config/application.rb:
+config.active_record.schema_format = :sql  # Hoặc :ruby
+
+-------------------------------------------------------------------------------------
+Miragation 
+Lệnh create_join_table :products, :categories trong Rails Migration được sử dụng để tạo bảng trung gian (join table) cho quan hệ many-to-many giữa products và categories
+🔥 Khi nào nên dùng change_table?
+Khi muốn thay đổi nhiều cột trong cùng một bảng.
+Viết gọn gàng hơn thay vì gọi add_column, remove_column từng dòng.
+
+✅ up và down hoạt động thế nào?
+up: Chạy khi bạn chạy rails db:migrate.
+down: Chạy khi bạn rollback bằng rails db:rollback.
+---------------------------------------------------------------------------------------
+begin
+  user = User.find(params[:id])
+  data = JSON.parse(some_json)
+rescue => e  # Bắt tất cả lỗi
+  Rails.logger.error "Lỗi xảy ra: #{e.class} - #{e.message}"
+  render json: { error: "Đã xảy ra lỗi" }, status: :internal_server_error
+end
+
+
+Bat tat ca loi bang rescue 
+
+------------------------------------------------------------------------------------------
+Index trong SQL 
+Nó sẽ chia làm 2 loại là cluster và non cluster. khi bạn tạo primary key thì nó sẽ tự tạo ra cái cluster chứa tất cả các trường dữ liệu 
+
+DataBase trong SQL không sắp xếp theo thứ tự mà sẽ là ngẫu nhiên sao cho hiệu suất tối ưu nhất khi có index thì bảng nó sẽ đc sắp xếp lại theo kiểu b tree và theo thứ tự 
+
+khi đánh index thì nó sẽ ưu tiên cột đầu tiên sắp xếp và hoạt động theo kiểu b tree các cột còn lại thì là sắp xếp (đánh index theo dạng (quiz_id, position) Index sẽ được xây dựng dựa trên quiz_id trước, sau đó mới đến position. Điều này có nghĩa là dữ liệu trong index sẽ được sắp xếp trước theo quiz_id, và với mỗi quiz_id, dữ liệu sẽ được sắp xếp tiếp theo position.) 
+
+Công thức: thứ tự đánh index: tìm kiếm rồi mới tới sắp xếp 
+nên khi không có index nó sẽ tìm kiếm rất khó khăn và phải tìm kiếm tất cả các dòng mà mỗi dòng nó còn nhiều dữ liệu nữa 
+index đi theo cấu trúc cây và nếu index là số lấy điểm trung bình làm giữa rồi chia ra 2 bên, nếu là string thì sẽ chia theo bảng chữ cái, kí tự đầu của string 
+Index sẽ lấy primary key là index nếu k có thì nó dùng unique_key de lam khoa chinh 
+-------------------------------------------------------------------------------------------
+Routes 
+
+get "/about", to: "pages#about"
+📌 Truy cập: http://localhost:3000/about
+📌 Điều hướng đến: PagesController → about action
+
+root "home#index"
+📌 Truy cập: http://localhost:3000/
+📌 Điều hướng đến: HomeController → index action
+
+resources :users
+📌 Tạo 7 routes mặc định: index, show, new, create, edit, update, destroy
+GET    /users          -> users#index
+GET    /users/:id      -> users#show
+GET    /users/new      -> users#new
+POST   /users          -> users#create
+GET    /users/:id/edit -> users#edit
+PATCH  /users/:id      -> users#update
+DELETE /users/:id      -> users#destroy
+
+
+resources :users, only: [:index, :show]
+Nếu không muốn tạo tất cả 7 routes của resources, bạn có thể giới hạn lại:
+
+ Custom Routes với member và collection
+ resources :users do
+  member do
+    get "profile"  # /users/:id/profile  #member: Thêm route liên quan đến 1 object (có id)
+  end
+  collection do
+    get "search"   # /users/search
+  end
+end
+
+
+ Lấy tham số từ URL: get "/users/:id", to: "users#show"
+def show
+  @user = User.find(params[:id])
+end
+
+------------------------------------------------
+VIEW
+form_with model: @user → Rails tự động gửi dữ liệu của user về controller.
+
+-------------------------------------------------------------
+Dùng blinding.dry để debug 
+
+nếu nó chưa vào hàm đó thì chưa chạy đc đâu 
+
+-----------------------------------------------------------------
+📌 Kiểm chứng session riêng biệt giữa người dùng
+Bạn có thể kiểm tra session trong controller bằng:
+puts "Session ID: #{session.id}"  # ID của session hiện tại
+puts "Exam Result: #{session[:exam_result]}"  # Dữ liệu session của user này
+Mở hai trình duyệt khác nhau (hoặc chế độ ẩn danh), bạn sẽ thấy session ID khác nhau và dữ liệu của mỗi user độc lập.
+
+
+---------------------------------------------------------------
+
+Select trả về 1 đối tượng
+1️⃣ Dùng select thay vì pluck
+@question_max = QuizSetting.select(:id, :question_max).find_by(user_id: current_user.id)
+👉 Kết quả: Trả về một đối tượng QuizSetting, bạn có thể truy cập trực tiếp @question_max.id và @question_max.question_max.
+
+
+-----------------------------------------------------------------
+
+pluck trả về 1 mảng có nhiều cột 
+2️⃣ Nếu muốn dùng pluck, dùng where thay vì find_by
+@question_max = QuizSetting.where(user_id: current_user.id).pluck(:id, :question_max).first
+👉 Kết quả: Trả về một mảng [id, question_max].
+-------------------------------------------------------------------
+persisted kiểm tra xem có tồn tại trong bảng hay k (kieemr trar ow view) 
+dùng includes để tránh N+1 querry
+Phương thức exists? trong Rails được sử dụng để kiểm tra xem một bản ghi có tồn tại trong cơ sở dữ liệu hay không. Nó trả về true nếu có ít nhất một bản ghi khớp với điều kiện và false nếu không có bản ghi nào.
+
+Nên ghi tất cả vào 1 mảng rồi insert 1 lúc thay vì insert từng cái 1 . Ví dụ phía dưới
+			notices = []
+			@user.followers.each do |follower|
+			  notices << {
+			    user_id: follower.follower_id,
+			    message: "#{@user.email} vừa hoàn thành bài kiểm tra!",
+			    notification_type: "quiz",
+			    status: false
+			  }
+			end
+			Notification.create(notices)
+
+-------------------------------------------------------------------
+QUEUE 
+tail -f log/sidekiq.log
+bundle exec sidekiq -C config/sidekiq.yml
+
+[6] pry(main)> require 'sidekiq/api'
+=> false
+[7] pry(main)> Sidekiq::RetrySet.new.clear
+=> true
+[8] pry(main)> Sidekiq::DeadSet.new.clear
+=> true
+Cách truyền			Ưu điểm			Nhược điểm
+Truyền object (current_user)	Không cần truy vấn lại DB	Nếu object bị xóa trước khi job chạy, job sẽ lỗi
+Truyền ID (current_user.id)	Tránh lỗi nếu object bị xóa	Cần truy vấn lại DB khi job chạy
+📌 Tóm lại:
+Dữ liệu quan trọng, cần đảm bảo job không lỗi → Truyền ID.
+Dữ liệu ít khi bị xóa, muốn tối ưu truy vấn DB → Truyền object. mặc định là sidekiq không hỗ trợ kiểu object nên bạn phải Dùng ActiveJob Serializers  để chuyển đổi object thành hash (này chưa làm) hiện tại cứ gửi string hash interge mảng thôi 	
+
+
+✅ CÓ THỂ dùng Job để thêm dữ liệu vào bảng, nhưng cần:
+Truyền ID thay vì object để tránh lỗi khi object bị xóa
+✅ ActiveRecord Object là chứa đầy đủ dữ liệu của một bản ghi trong database.
+Dùng lock hoặc kiểm tra dữ liệu để tránh race condition
+
+LOCK
+🚨 Gây chậm nếu có nhiều tiến trình cùng truy cập, vì mỗi tiến trình phải chờ khóa được mở.
+🚨 Nếu một tiến trình giữ khóa quá lâu, có thể gây deadlock (tiến trình khác phải chờ mãi).
+update_all cập nhật thẳng vào DB, không cần queue, không quan tâm process khác
+
+Dùng Sidekiq với retry để tránh job thất bại không xử lý lại
+
+
+THÊM DỮ LIỆU TRONG LOG
+✅ Nên dùng insert_all nếu cần tốc độ cao, không cần validation.
+✅ Dùng import nếu vẫn muốn chạy validation & callback.
+✅ Không nên dùng .create từng cái nếu dữ liệu lớn, vì chậm & tốn tài nguyên.
+
+PROCESS 
+Process (tiến trình) là một chương trình đang chạy trên hệ điều hành. Mỗi process có:
+✅ Bộ nhớ riêng (không chia sẻ với process khác).
+✅ Tài nguyên riêng (file, socket, connection, v.v.).
+✅ Có thể chạy nhiều thread bên trong.
+
+📌 Ví dụ:
+Khi bạn chạy rails server, nó tạo ra một process để xử lý web requests.
+Khi bạn chạy bundle exec sidekiq, nó tạo ra một Sidekiq worker process để xử lý job.
+📌 Hình dung:
+Một process giống như một nhà hàng → Mỗi nhà hàng có nhiều nhân viên (thread) làm việc.
+
+
+THREAD 
+Thread (luồng) là đơn vị nhỏ nhất của một process, giúp thực hiện nhiều tác vụ song song.
+✅ Nhiều thread trong một process có thể chia sẻ bộ nhớ và tài nguyên.
+✅ Tạo thread nhanh hơn tạo process mới vì nó dùng chung bộ nhớ của process.
+✅ Thread cùng một process có thể giao tiếp với nhau dễ dàng hơn process khác.
+
+📌 Ví dụ:
+Trong một process Sidekiq, có thể có 5 thread xử lý 5 job cùng lúc.
+Trong web server Puma, có thể có nhiều thread xử lý nhiều request cùng lúc.
+📌 Hình dung:
+Thread giống như nhiều nhân viên trong cùng một nhà hàng (process), cùng làm việc để phục vụ khách.
+
+
+WORKER 
+Worker là một thuật ngữ chung để chỉ một đơn vị thực thi công việc (job). Nó có thể là:
+✅ Một process (ví dụ: một process Sidekiq).
+✅ Một thread trong một process.
+✅ Một máy chủ riêng biệt chạy các job (ví dụ: một container Sidekiq worker trên Kubernetes).
+
+📌 Ví dụ:
+Khi bạn chạy Sidekiq, nó tạo ra một worker process.
+Worker này có thể chạy nhiều thread bên trong để xử lý job song song.
+Khi có nhiều job cần xử lý, bạn có thể chạy nhiều worker process trên nhiều server.
+📌 Hình dung:
+Worker giống như một nhà hàng phụ, có thể chứa nhiều nhân viên (thread) để phục vụ khách hàng.
+
+✅ Tạo một process Sidekiq với 5 thread.
+✅ Trong đó:
+5 thread ưu tiên critical.
+3 thread xử lý default.
+1 thread xử lý low.
+như này thì khi xử lý xong critical thì nó sẽ xử lý default và low cùng lúc 
+
+
+🧠 Vậy nên tăng workers hay threads?
+Dù 5 x 10 = 50 hay 2 x 25 = 50 đều xử lý được 50 request cùng lúc, nhưng bản chất hoạt động của chúng rất khác, ảnh hưởng đến:
+
+Tiêu chí		workers							threads
+Là gì?			Process độc lập					Thread trong 1 process
+Dùng CPU thế nào?	Tốt cho CPU-bound (nhiều nhân)				Tốt cho I/O-bound (chờ DB, API,...)
+Tốn RAM		Cao hơn (mỗi worker là process riêng)			Thấp hơn
+Chia tải CPU		Tốt (đa core hoạt động hiệu quả)			Không chia core, dùng trong core hiện tại
+Độ ổn định		Nếu 1 worker crash thì các worker khác vẫn sống	Nếu 1 thread lỗi có thể ảnh hưởng process
+
+✅ Khi nào tăng workers?
+Máy bạn có nhiều nhân CPU (vd: 4 cores → set workers = 4)
+
+App có xử lý nặng về tính toán
+
+Bạn muốn tách biệt tiến trình để tăng độ ổn định
+
+✅ Khi nào tăng threads?
+App của bạn I/O-bound (chờ Redis, DB, gọi API)
+
+Muốn tiết kiệm RAM
+
+Ít core nhưng nhiều kết nối cần chờ đợi
+
+
+-------------------------------------------------
+ELASTICSEARCH 
+
+sudo systemctl start elasticsearch
+sudo systemctl stop elasticsearch
+sudo systemctl status elasticsearch
+1. Kiểm tra Elasticsearch đang chạy
+curl -X GET "http://localhost:9200"
+🔹 3. Liệt kê tất cả index
+curl -X GET "http://localhost:9200/_cat/indices?v"
+🔹 4. Tạo một index mới
+curl -X PUT "http://localhost:9200/my_index"
+🔹 5. Xóa một index
+curl -X DELETE "http://localhost:9200/my_index"
+2️⃣ Re-index lại dữ liệu từ database
+rails runner 'User.__elasticsearch__.import'
+-----------------------------------------------------------------
+BACKUP DB 
+✅ Khi nào dùng Binary Log, khi nào dùng Cronjob?
+🔹 Dùng Binary Log nếu:
+
+Cần khôi phục nhanh sau sự cố (hệ thống tài chính, ngân hàng, v.v.).
+
+Cần backup cả dữ liệu lẫn thay đổi theo thời gian thực.
+
+🔹 Dùng Cronjob nếu:
+
+Chỉ cần backup định kỳ (hằng ngày, hằng tuần).
+
+Không cần phục hồi từng thay đổi nhỏ mà chỉ cần backup tổng thể.
+
+crontab -e (dùng lệnh này để vô chỉnh)
+cấu hình lại PATH trong crontab! 🚀
+Trước đây, cronjob dùng Ruby hệ thống (3.0.2), nên bị lỗi version.
+Bây giờ bạn đã đặt PATH để ưu tiên Ruby từ rbenv, nên nó chạy đúng Ruby 3.1.2 của bạn.
+
+✅ Luôn đặt PATH trong crontab -e nếu dùng rbenv.
+✅ Dùng /bin/bash -l -c nếu cronjob cần nạp biến môi trường.
+✅ Dùng bundle exec để chạy Rails với đúng gem.
+
+------------------------------------------------------------------
+Query trong rails 
+Bạn không cần cấu hình query parameters trong routes.rb vì Rails tự động xử lý chúng từ URL.
+<%= link_to "Admin Users", users_path(role: 'admin', page: 2) %>
+Kết quả là, khi người dùng click vào liên kết, URL sẽ trông như sau:
+/users?role=admin&page=2
+
+----------------------------------------------------------------------
+rails s -p 3002 -b 192.168.0.35
+----------------------------------------------------------------------
+Transaction trong SQL là một nhóm các câu lệnh SQL. Nếu một transaction được thực hiện thành công, tất cả các thay đổi dữ liệu được thực hiện trong transaction được lưu vào cơ sở dữ liệu. Nếu một transaction bị lỗi và được rollback, thì tất cả các sửa đổi dữ liệu sẽ bị xóa (dữ liệu được khôi phục về trạng thái trước khi thực hiện transaction).
+Transaction dùng khi: Tác động nhiều bảng cùng lúc (user, order, profile,...)	
+
+🧠 Transaction khác là gì?
+→ Là transaction khác biệt, được mở ở một kết nối (session) khác với transaction hiện tại.
+→ Không quan trọng là từ user khác hay cùng 1 user, chỉ cần là một transaction khác thì đều tính là “transaction khác”.
+
+ở bên ngoài transaction thì hành động là riêng lẻ nếu thất bại thì k lưu vào db, có ! thì báo lỗi không có ! thì k báo. ở trong transaction thì rollback lại tất nếu có lỗi 
+! → báo lỗi (nếu có)
+transaction → rollback nếu có lỗi
+→ Dùng cả hai mới đảm bảo an toàn dữ liệu
+-----------------------------------------------------------------------------
+Xử lý trong TRANSACTION 
+✅ Các method như save, destroy KHÔNG cần ! để rollback:
+Vì chúng đã được ActiveRecord tự động bọc trong transaction.
+Nếu validation sai hoặc có exception trong callback, Rails tự rollback.
+Không cần !, chỉ cần bạn xử lý đúng kết quả trả về (true/false).
+
+
+PostgreSQL mặc định đã cấu hình sẵn mức isolation level là READ COMMITTED và đây là mức an toàn khỏi "dirty read" rồi. 🔐 Không cho phép đọc dữ liệu chưa commit
+⛔ Tức là:
+Khi T1 muốn đọc 1 bản ghi, thì nó chỉ được đọc giá trị cuối cùng đã commit, dù có session khác đang sửa cũng không được nhìn thấy.
+
+🧨 1. Dirty Read (Đọc dữ liệu "bẩn", chưa commit)
+🔍 Mô tả:
+Transaction 2 (T2) update bản ghi nhưng chưa commit
+Transaction 1 (T1) đọc bản ghi đó trong khi nó vẫn đang "tạm thời"
+Sau đó T2 rollback, và T1 đang cầm dữ liệu không tồn tại 🤯
+
+MySQL thì ngoài tránh dirty read, nó còn tránh non-repeatable read luôn, tức là:
+
+🔁 2. Non-repeatable Read (Đọc không lặp lại được)
+🔍 Mô tả:
+T1 đọc bản ghi X lần đầu
+T2 sửa bản ghi X và commit
+T1 đọc lại bản ghi X và thấy giá trị khác → gây lỗi logic (nếu đang xử lý logic từ lần đọc đầu)
+
+✅ Cách xử lý:
+Dùng isolation level: REPEATABLE READ hoặc SERIALIZABLE (cai nay de xu ly phantom gio t chua hoc dc)
+
+REPEATABLE READ
+T1 đọc snapshot cố định BẢN GHI của dữ liệu ngay từ lần đọc đầu tiên
+Không bị ảnh hưởng bởi các commit sau đó của transaction khác
+
+Hoặc dùng .lock để khóa bản ghi khi T1 đang xử lý
+ user = User.lock.find(1)  # SELECT FOR UPDATE
+  # giờ không ai có thể sửa user này cho đến khi T1 commit
+  
+  
+  Ví dụ thực tế để k bị nhầm db sẽ k tự động truy vấn lại những hàm trong transaction - trường hợp bị lặp như ví dụ dưới thì mới cần phải để ý REPEATABLE READ hoặc READ COMMITTED
+  
+  # Terminal 1
+User.transaction(isolation: :repeatable_read) do
+  puts "First Read:"
+  p User.where("age > 18").pluck(:name)
+
+  puts "⏳ Sleeping 10s..."
+  sleep 10
+
+  puts "Second Read:"
+  p User.where("age > 18").pluck(:name)
+end
+
+
+# Terminal 2 (trong vòng 10s)
+User.create(name: "Quốc Anh", age: 25)
+
+ Lúc chạy xong bạn sẽ không thấy "Quốc Anh" trong lần đọc thứ 2 nếu isolation = :repeatable_read
+→ Nếu để mặc định (read committed) thì sẽ thấy Quốc Anh ở lần đọc thứ 2.
+
+
+Mức Isolation			Khi nào dùng					Tránh được gì		Hiệu năng
+READ COMMITTED (default)	Hầu hết CRUD bình thường			Dirty Read		Nhanh, phổ biến
+REPEATABLE READ			Logic đọc rồi update/phụ thuộc dữ liệu cũ	Dirty + Non-repeatable	Chậm hơn chút
+SERIALIZABLE			Phải đảm bảo tuyệt đối, như kiểm tra số lượng	Tất cả			Chậm nhất, dễ deadlock
+
+
+
+
+--------------------------------------------
+1. turbo-frame — cập nhật phần tử HTML cụ thể (thay thế trực tiếp)
+→ Khi click link, server trả về HTML (view) và nó thay toàn bộ nội dung trong turbo-frame.
+
+2. turbo-stream — thực thi hành động (append, remove, update...) lên DOM
+Bạn muốn thực hiện hành vi như: append, prepend, replace, remove... với phần tử DOM nào đó.
+Rất phù hợp cho tương tác thời gian thực, ví dụ thêm bình luận, xóa dòng, cập nhật danh sách.
+
+Dùng turbo-frame khi bạn muốn load và thay thế vùng HTML cụ thể — giống như iframe nội bộ.
+Dùng turbo-stream khi bạn muốn điều khiển hành vi DOM chi tiết hơn như append/xóa/update từng phần tử.
+-----------------------------------------------
+console.log("1");
+const order = await Order.findOne({ _id: 123 }); // giả sử mất 2 giây
+console.log("2");
+Thời điểm  		Chuyện gì xảy ra
+0s 			console.log("1") chạy ngay
+0.01s 			Order.findOne() gửi query đi MongoDB (ở tầng dưới, không nằm trong JS)
+0.02s  			await tạm DỪNG code JS ở đây, và trả quyền lại cho event loop
+2.0s  			MongoDB trả kết quả → callback (console.log("2")) được đưa vào queue
+2.01s  			Event loop thấy call stack rảnh → đẩy console.log("2") lên call stack và chạy
+
+Luồng chính ném ra luồng ngoài k chờ mà cho luồng ngoài xử lý xong thì ném vào event loop queue. khi nào luồng chính rảnh thì lấy ở queue lên xử lý tiếp 
+
+Nếu bạn không sử dụng await với các tác vụ bất đồng bộ trong Node.js (hoặc không sử dụng .then() với Promises), các tác vụ này sẽ vẫn thực thi bất đồng bộ nhưng chương trình sẽ không đợi kết quả và sẽ tiếp tục thực hiện các tác vụ tiếp theo mà không quan tâm đến kết quả của tác vụ bất đồng bộ.
+

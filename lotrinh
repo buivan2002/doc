@@ -71,3 +71,8 @@ Load balancing với Nginx + Puma.
 Học cách deploy Rails với Capistrano, GitHub Actions, CircleCI.
 
 Học Terraform, Ansible để tự động hóa hạ tầng.
+
+
+Các bước deploy: Deploy DB bằng các bên thứ 3. Nhớ tạo migrate. postgre nó còn bắt cả viết thường viết hoa cẩn thận.
+Deploy backend lên và kết nối tới các host, name, ... mà DB nãy vừa mới deploy lên nó trả lại. 
+Deploy Fe lên và call api tới. 

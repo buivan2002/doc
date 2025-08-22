@@ -34,6 +34,7 @@ Truy vấn phức tạp, cần JOIN gộp dữ liệu | 	 eager_load / includes 
 
 ---------------------------------------
  rm .overmind.sock
+overmind start -f Procfile.dev
 
 git commit --amend gop chung commit 
 
@@ -60,5 +61,6 @@ Nhưng: request đó vẫn được giữ sống trong memory (gọi là "in-fli
 
 ➤ Nếu có 10,000 request như vậy thì bạn vẫn đang giữ 10,000 kết nối, chờ phản hồi → ngốn RAM + connection pool!
 
-
+mysqldump -u root -p tea role_permissions > role_permissions.sql
+mysql -u root -p caetech < role_permissions.sql
 

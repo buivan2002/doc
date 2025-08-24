@@ -629,3 +629,9 @@ Lấy tất cả bản ghi của cả 2 bảng, nếu không khớp thì trả N
 | CROSS JOIN | ✅ tất cả             | ✅ tất cả             | Không có điều kiện  |
 | SELF JOIN  | Dùng chính bảng      | Dùng chính bảng      | Alias để phân biệt  |
 
+=============================================
+
+| Biểu thức bên phải `await` | Khi nào chạy              | Cái gì bị pause                         |
+| -------------------------- | ------------------------- | --------------------------------------- |
+| **Không phải Promise**     | Chạy ngay                 | Code sau `await`                        |
+| **Promise**                | Promise bắt đầu chạy ngay | Code sau `await` sẽ đợi Promise resolve |

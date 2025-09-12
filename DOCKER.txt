@@ -1,0 +1,169 @@
+DOCKER
+
+Nó lừa container là nó có hệ điều hành riêng nhưng thật ra chỉ là lấy hệ điều hành của local server thôi. VM mới thật sự là có OS riêng. 
+
+🔹 1. Docker “ăn ké” trực tiếp Linux kernel
+
+Container không ảo hóa nguyên OS mà chỉ ảo hóa ở mức kernel (OS-level virtualization).
+
+Linux có sẵn:
+Namespaces → tách biệt process, network, filesystem.
+cgroups → giới hạn CPU, RAM, I/O.
+Docker chỉ là lớp quản lý + CLI để dùng các feature này.
+👉 Vì vậy trên Linux, khi chạy container, process của container = process bình thường của Linux, không cần thêm lớp trung gian.
+⏱ Kết quả: chạy cực nhanh, overhead gần như bằng 0.
+
+
+2. Trên Windows & macOS thì khác
+
+Windows & macOS không có Linux kernel.
+Docker lại cần Linux kernel để dùng namespaces + cgroups.
+
+Giải pháp: Docker Desktop phải chạy 1 Linux VM ẩn bên dưới (dùng Hyper-V, WSL2 trên Windows, hoặc HyperKit trên macOS).
+
+Container thực chất chạy bên trong VM này → nên:
+
+Tốn RAM/CPU hơn.
+Khởi động chậm hơn.
+I/O (disk, network) bị chậm do qua nhiều lớp.
+
+---------------------------------------------------
+Docker Desktop không chỉ là “Docker” đơn thuần, mà là một bộ công cụ trọn gói để chạy container trên Windows/Mac (vì bản thân 2 hệ này không có Linux kernel).
+---------------------------------------------------
+
+🖼 Docker Image = 1 file (bản mẫu)
+
+Nó thực sự là 1 file snapshot (nhiều layer xếp chồng) chứa toàn bộ những gì cần để chạy app: code, lib, config…
+
+Vì vậy khi bạn tải image về (docker pull), nó giống như tải 1 file nén (.zip, .iso).
+
+💻 Docker Container = “máy tính thu nhỏ” chạy từ file đó
+
+Khi bạn docker run image_name → Docker sẽ giải nén image + thêm 1 layer read/write bên trên → rồi chạy nó như 1 máy tính mini (nhưng nhẹ hơn VM rất nhiều).
+
+Container chạy trên kernel của host (Linux kernel trong trường hợp Docker Engine).
+
+Vì vậy container không “ảo hóa cả máy” như VM, mà chỉ tách biệt tiến trình (process isolation).
+
+Khi bạn chạy một image (docker run <image>) thì Docker sẽ tạo ra container từ image đó.
+---------------------------------------------------
+Một container chỉ được tạo ra từ đúng một image.
+
+Vì sao vậy?
+
+Container là instance của image → tức là nó phải có “gốc” rõ ràng để build root filesystem.
+
+Khi bạn docker run ubuntu:20.04 → Docker copy filesystem từ image ubuntu:20.04 rồi thêm 1 layer read/write bên trên → thành container.
+
+Nếu container được tạo từ nhiều image thì Docker sẽ không biết “root filesystem” lấy ở đâu.
+
+-----------------------------------------------------
+🗂 Docker Registry
+
+Là kho lưu trữ image (giống như “git repo” nhưng dành cho image).
+
+Registry có thể là:
+
+Public (ai cũng dùng) → Docker Hub
+
+Private (nội bộ công ty) → ví dụ: Harbor, GitLab Container Registry, AWS ECR, GCP Artifact Registry…
+
+Một registry có thể chứa nhiều repository, trong repository có nhiều image tag.
+
+Docker Registry = khái niệm chung → kho chứa image.
+Docker Hub = một registry cụ thể, mặc định của Docker, giống như “Github dành cho Docker Image”.
+
+===============================================
+📄 Dockerfile
+
+Là file hướng dẫn để build ra 1 image.
+Bạn mô tả: base image, copy code, cài lib, lệnh chạy app…
+
+Docker build -t <name> <nơi lưu trữ docker> 
+
+FROM <image>
+RUN <command> chạy cái lệnh này ở trong container 
+WORKDIR <directory> tạo thư mục trong images
+COPY <src> <dest> copy thư mục gốc vào thư mục của images
+ADD <src/url> <dest> tương tự copy nhưng có thể tải file trên mạng về 
+EXPOSE <PORT> Xuất ra port nào 
+CMD ["","",..] thực thi cuối cùng 
+
+
+1. Cơ chế hoạt động của Dockerfile và Image Layer
+Khi bạn viết Dockerfile, Docker sẽ build image theo từng lệnh (FROM, RUN, COPY, ADD, …).
+Mỗi lệnh → tạo ra 1 layer mới trong image.
+Các layer được xếp chồng (union filesystem) và chỉ đọc (read-only).
+Container chạy → Docker thêm 1 layer read/write lên trên cùng để ghi dữ liệu tạm.
+
+👉 Vì vậy:
+Nếu layer nào không thay đổi → Docker sẽ cache lại, không build lại.
+Layer nào thay đổi → tất cả các layer sau đó sẽ bị build lại.
+
+Cơ chế: Mỗi layer là 1 images nó build thì nó chạy từng layer copy vào layer sau rồi xóa luôn trong lúc build. cuối cùng chỉ giữ lại cái layer cuối cùng có tất cả dữ liệu của layer trước đó 
+
+Tối ưu bằng layer nghĩa là:
+Sắp xếp lệnh hợp lý để tận dụng cache.
+Gộp lệnh để giảm layer.
+Dùng base image nhỏ + dọn rác trong cùng layer.
+Dùng multi-stage build để giảm kích thước image.
+--------------------------------------------------------
+⚙️ Docker Compose
+
+Là công cụ giúp chạy nhiều container cùng lúc, định nghĩa trong file docker-compose.yml.
+Bạn mô tả các service (web, db, cache…), network, volume…
+Viết bằng file yaml
+Version: '' Version của docker enigeer 
+servics: chứa các images cần chạy 
+	pg: đây là lấy ở trên register
+		image: postgres:9.6-alpine
+		ports:
+			-5432:5432
+	frontend: đây là images tự build 
+		image: tên image 
+		build:
+			context: . //nơi chứa file dockerfile
+
+docker-compose up (chạy hết images bên trong)
+
+
+Dockerfile = công thức nấu ăn → cho ra một “món ăn” (image).
+Docker Compose = thực đơn + cách bày bàn → gọi nhiều món ăn (nhiều container) và cho chúng hoạt động cùng nhau.
+
+========================================================
+DOCKER NETWORK
+Là cơ chế để các container giao tiếp với nhau.
+
+Có nhiều loại network trong Docker:
+
+bridge (default cho Compose) → container nói chuyện với nhau qua tên service.
+host → container dùng trực tiếp network của host.
+overlay → dùng cho cluster (Swarm, Kubernetes).
+
+👉 Ví dụ với Compose ở trên:
+
+app có thể kết nối tới db qua hostname db:5432 (vì Compose tự tạo network).
+Bạn không cần nhớ IP, chỉ cần dùng service name (db).
+
+Khi bạn chạy docker-compose up, Docker Compose sẽ:
+
+Tạo một network riêng cho project (thường tên dạng <project>_default).
+Gắn tất cả container (services) trong file docker-compose.yml vào network đó.
+Cho phép container giao tiếp với nhau bằng service name.
+
+=================================================
+
+PORT
+Mỗi image có 1 port riêng bạn có thể truy cập vào image đó bằng cách blingding port (kết nối local với port network docker)
+
+Docker ps -a Hiển thị những image đã chạy trước đây 	 
+
+NƠI LƯU TRỮ FILE IMAGES
+Trên Linux: image nằm ở /var/lib/docker.
+Trên Windows/macOS (Docker Desktop): image nằm trong máy ảo nội bộ của Docker, bạn không thấy trực tiếp bằng Explorer, nhưng Docker CLI (docker images, docker inspect) quản lý cho bạn.
+================================================== 
+
+Volume (nơi lưu trữ local)
+
+Container nó không tự động lưu trữ thông tin. Khi tắt container đi thì nó sẽ mất hết. 
+Vì vậy cần phải có volume để data container nó lưu trữ vào đấy.

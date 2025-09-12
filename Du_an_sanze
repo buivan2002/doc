@@ -1,0 +1,64 @@
+Chuyển db để chỉnh sửa 
+[6] pry(main)> Apartment::Tenant.switch!('caetech')  # 'caetech' là tên tenant (thường là subdomain)
+-------------------------------
+FORM 
+<%= form_with model: @post do |f| %>  <!-- remote: false mặc định -->
+→ Gửi request HTML, sau khi submit sẽ:
+Chuyển trang (redirect_to)
+Hoặc render create.html.erb
+
+<%= form_with model: @post, remote: true do |f| %>
+→ Gửi request bằng AJAX, Rails sẽ:
+Gọi tới create.js.erb
+Và bạn có thể xử lý jQuery, DOM mà không cần reload lại trang
+
+<%= form_with model: ..., data: { turbo: true } %>
+→ Dùng Hotwire/Turbo để tự động cập nhật DOM bằng turbo_stream.
+format.turbo_stream { render "bulletin_categories/index/page_bulletin_category_reverse" }
+--------------------------------
+MODEL 
+  scope :categories_default, -> { where(default: 1)}
+Thay vì viết lặp đi lặp lại các điều kiện trong nhiều nơi (controller, service), bạn gom vào scope. Ví dụ:
+Category.where(default: 1) # lặp lại nhiều lần
+Thay bằng:
+Category.categories_default
+
+--------------------------------------
+
+Trường hợp | 					Nên dùng |			 Tốc độ
+Chỉ show dữ liệu liên kết |			 preload | 			✅ Nhanh hơn
+Cần lọc theo bảng liên kết |			 joins / includes → join  	✅ Bắt buộc dùng
+Dữ liệu liên kết ít, tránh N+1 | 		 preload | 			✅ Tốt
+Truy vấn phức tạp, cần JOIN gộp dữ liệu | 	 eager_load / includes | 	⚠ Có thể chậm hơn
+
+
+---------------------------------------
+ rm .overmind.sock
+
+git commit --amend gop chung commit 
+
+git checkout origin/main -- config/credentials.yml.enc
+👉 "Lấy lại phiên bản cũ của config/credentials.yml.enc từ nhánh main trên remote."
+
+ git rm --cached app/controllers/landing_controller.rb  
+ Sau khi commit lại, Git sẽ không theo dõi file này nữa (file bị xóa khỏi commit, nhưng vẫn còn trong máy).
+ 
+ --------------------------------------------
+ 
+ Xây dựng kiến trúc hệ thống 
+ 
+ 
+ app.get("/slow-api", async (req, res) => {
+  const data = await fetch("https://external-api.com/slow");
+  res.send(data);
+});
+
+Khi client gọi /slow-api:
+Server gửi request ra ngoài.
+Trong khi chờ kết quả về, thread sẽ nhường chỗ (non-blocking) → tốt.
+Nhưng: request đó vẫn được giữ sống trong memory (gọi là "in-flight request").
+
+➤ Nếu có 10,000 request như vậy thì bạn vẫn đang giữ 10,000 kết nối, chờ phản hồi → ngốn RAM + connection pool!
+
+
+

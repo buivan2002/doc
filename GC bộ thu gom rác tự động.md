@@ -642,7 +642,7 @@ type Shape interface {
 
 func  dothings (s Shape) float64 {
 
-\&nbsp;	return s.Area()
+	return s.Area()
 
 }
 
@@ -650,7 +650,7 @@ func  dothings (s Shape) float64 {
 
 type Rectangle struct {
 
-\&nbsp;	Width, Height float64
+	Width, Height float64
 
 }
 
@@ -658,23 +658,22 @@ type Rectangle struct {
 
 func (r Rectangle) Area() float64 {
 
-\&nbsp;	return r.Width \\\* r.Height
+return r.Width \\\* r.Height
 
 }
 
 
 
 func main() {
+	var s Shape = Rectangle{3, 4}
 
-\&nbsp;	var s Shape = Rectangle{3, 4}
+	fmt.Println("Area:", s.Area()) // Area: 12
 
-\&nbsp;	fmt.Println("Area:", s.Area()) // Area: 12
+	sRect := Rectangle{4, 5}
 
-\&nbsp;	sRect := Rectangle{4, 5}
+  s1 := dothings(sRect)
 
-\&nbsp;	s1 := dothings(sRect)
-
-\&nbsp;	fmt.Println("Area:", s1) // Area: 20
+	fmt.Println("Area:", s1) // Area: 20
 
 
 
